@@ -46,7 +46,7 @@ while True:
 
             cv2.putText(img, classNames[cls], org, font, fontScale, color, thickness)
 
-    cv2.imshow('Webcam', img)
+    cv2.imshow('realsence', img)
     if cv2.waitKey(1) == ord('q'):
         break
 
