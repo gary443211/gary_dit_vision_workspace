@@ -10,7 +10,7 @@ cap.set(4, 480)
 model = YOLO("best.pt")
 
 # object classes
-classNames =  ("light", "dark", "can")
+classNames =  ("can", "dark", "light")
 
 
 while True:
