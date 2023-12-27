@@ -12,6 +12,9 @@ model = YOLO("best.pt")
 # object classes
 classNames =  ("can", "dark", "light")
 
+# Initialize variables for FPS calculation
+prev_time = 0
+fps = 0
 
 while True:
     success, img = cap.read()
