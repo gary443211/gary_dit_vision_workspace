@@ -2,7 +2,6 @@ from ultralytics import YOLO
 import cv2
 import math
 import numpy as np
-import pyrealsense2 as rs
 from time import time
 
 # start webcam
