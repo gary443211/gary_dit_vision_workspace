@@ -22,8 +22,8 @@ prev_time = 0
 fps = 0
 
 # Set the desired window resolution
-window_width = 1280
-window_height = 720
+window_width = 640
+window_height = 480
 
 # Create an OpenCV window
 cv2.namedWindow('RealSense YOLO', cv2.WINDOW_NORMAL)
