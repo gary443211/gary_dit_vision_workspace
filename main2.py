@@ -80,8 +80,8 @@ while True:
     prev_time = current_time
 
     # Display confidence and FPS text
-    cv2.putText(img, f'Confidence: {confidence}', (10, 300), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-    cv2.putText(img, f'FPS: {fps:.2f}', (10, 340), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+    cv2.putText(img, f'Confidence: {confidence}', (10, 350), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+    cv2.putText(img, f'FPS: {fps:.2f}', (10, 390), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
     cv2.imshow('RealSense YOLO', img)
     if cv2.waitKey(1) == ord('q'):
