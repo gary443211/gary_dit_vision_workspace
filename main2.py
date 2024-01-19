@@ -12,10 +12,10 @@ config.enable_stream(rs.stream.color, 1280, 720, rs.format.bgr8, 30)
 pipeline.start(config)
 
 # Model
-model = YOLO("best.pt")
+model = YOLO("onboard_cam.pt")
 
 # Object classes
-classNames = ("can", "dark", "light")
+classNames = ("plant")
 
 # Initialize variables for FPS calculation
 prev_time = 0
@@ -23,7 +23,7 @@ fps = 0
 
 # Set the desired window resolution
 window_width = 640
-window_height = 480
+window_height = 360
 
 # Create an OpenCV window
 cv2.namedWindow('RealSense YOLO', cv2.WINDOW_NORMAL)
@@ -80,8 +80,8 @@ while True:
     prev_time = current_time
 
     # Display confidence and FPS text
-    cv2.putText(img, f'Confidence: {confidence}', (10, 350), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-    cv2.putText(img, f'FPS: {fps:.2f}', (10, 390), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+    cv2.putText(img, f'Confidence: {confidence}', (10, 310), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+    cv2.putText(img, f'FPS: {fps:.2f}', (10, 350), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
     cv2.imshow('RealSense YOLO', img)
     if cv2.waitKey(1) == ord('q'):
