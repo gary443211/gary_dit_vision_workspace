@@ -5,15 +5,15 @@ import numpy as np
 from time import time
 
 # start webcam
-cap = cv2.VideoCapture(6)
-cap.set(3, 640)
+cap = cv2.VideoCapture(4)
+cap.set(3, 720)
 cap.set(4, 480)
 
 # model
-model = YOLO("best.pt")
+model = YOLO("onboard_cam.pt")
 
 # object classes
-classNames =  ("can", "dark", "light")
+classNames =  ("plant")
 
 # Initialize variables for FPS calculation
 prev_time = 0
@@ -58,6 +58,7 @@ while True:
     prev_time = current_time
 
     # Display confidence and FPS text
+    #cv2.putText(img, f'Confidence: {confidence}', (10, 350), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
     cv2.putText(img, f'FPS: {fps:.2f}', (10, 390), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
     
     cv2.imshow('realsence', img)
