@@ -4,6 +4,7 @@ import math
 from decimal import Decimal, ROUND_HALF_UP
 import numpy as np
 from PIL import Image
+from time import time
 
 #main 函數的開始。theta 是相機角度，config 是Intel RealSense配置。
 def main():
