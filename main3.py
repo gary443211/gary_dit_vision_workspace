@@ -94,7 +94,7 @@ while True:
 
             #coordinate transformation, theta is the camera deprssion angle
             #Xtarget = Xtemp - 35 #35 is RGB camera module offset from the center of the realsense
-            Xtarget = Xtemp
+            Xtarget = Xtemp #seems like we don't have the offset here
             Ytarget = -(Ztemp*math.sin(theta) + Ytemp*math.cos(theta))
             Ztarget = Ztemp*math.cos(theta) + Ytemp*math.sin(theta)
                 
