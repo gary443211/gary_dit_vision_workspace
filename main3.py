@@ -30,80 +30,96 @@ window_height = 360
 cv2.namedWindow('RealSense YOLO', cv2.WINDOW_NORMAL)
 cv2.resizeWindow('RealSense YOLO', window_width, window_height)
 
-# test
-frames = pipeline.wait_for_frames()
-print("Number of frames:", len(frames))
-depth_frame = frames.get_depth_frame()
-if depth_frame:
-    Depth = depth_frame.get_distance(320, 180)
-    print("central depth --->", Depth)
-else:
-    print("Depth frame is None")
+# # test
+# frames = pipeline.wait_for_frames()
+# print("Number of frames:", len(frames))
+# depth_frame = frames.get_depth_frame()
+# if depth_frame:
+#     Depth = depth_frame.get_distance(320, 180)
+#     print("central depth --->", Depth)
+# else:
+#     print("Depth frame is None")
 
 
-# while True:
-#     # Wait for a RealSense frame
-#     frames = pipeline.wait_for_frames()
-#     color_frame = frames.get_color_frame()
-#     depth_frame = frames.get_depth_frame()
+while True:
+    # Wait for a RealSense frame
+    frames = pipeline.wait_for_frames()
+    color_frame = frames.get_color_frame()
+    depth_frame = frames.get_depth_frame()
 
-#     # Convert RealSense frame to OpenCV format
-#     img = np.asanyarray(color_frame.get_data())
+    # Convert RealSense frame to OpenCV format
+    img = np.asanyarray(color_frame.get_data())
 
-#     # Resize the image to match the window resolution
-#     img = cv2.resize(img, (window_width, window_height))
+    # Resize the image to match the window resolution
+    img = cv2.resize(img, (window_width, window_height))
 
-#     results = model(img, stream=True)
+    results = model(img, stream=True)
 
-#     # Initialize confidence variable
-#     confidence = 0
+    # Initialize confidence variable
+    confidence = 0
 
-#     # Coordinates
-#     for r in results:
-#         boxes = r.boxes
+    # Coordinates
+    for r in results:
+        boxes = r.boxes
 
-#         for box in boxes:
-#             # Bounding box
-#             x1, y1, x2, y2 = box.xyxy[0]
-#             x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)  # Convert to int values
+        for box in boxes:
+            # Bounding box
+            x1, y1, x2, y2 = box.xyxy[0]
+            x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)  # Convert to int values
 
-#             # Draw bounding box on the frame
-#             cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 255), 2)
+            # Draw bounding box on the frame
+            cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 255), 2)
 
-#             # Confidence
-#             confidence = math.ceil((box.conf[0] * 100)) / 100
-#             print("Confidence --->", confidence)
+            # Confidence
+            confidence = math.ceil((box.conf[0] * 100)) / 100
+            print("Confidence --->", confidence)
 
-#             # Class name
-#             cls = int(box.cls[0])
-#             print("Class name -->", classNames[cls])
+            # Class name
+            cls = int(box.cls[0])
+            print("Class name -->", classNames[cls])
 
-#             # Get depth of the center of the box
-#             d1, d2 = int((x1+x2)/2), int((y1+y2)/2)
-#             Depth = depth_frame.get_distance(int(d1),int(d2))  # by default realsense returns distance in meters 
+            # Get distance(depth) of the center of the box
+            d1, d2 = int((x1+x2)/2), int((y1+y2)/2)
+            Depth = depth_frame.get_distance(int(d1),int(d2))  # by default realsense returns distance in meters 
 
-#             # Object details
-#             org = (x1, y1)
-#             font = cv2.FONT_HERSHEY_SIMPLEX
-#             fontScale = 1
-#             color = (255, 0, 0)
-#             thickness = 1
+            #calculate real world coordinates
+            Xtemp = dist*(int(d1) -intr.ppx)/intr.fx
+            Ytemp = dist*(int(d2) -intr.ppy)/intr.fy
+            Ztemp = dist
 
-#             cv2.putText(img, classNames[cls], org, font, fontScale, color, thickness)
-#             cv2.putText(img, Depth, org, font, fontScale, color, thickness)
+            #coordinate transformation, theta is the camera deprssion angle
+            Xtarget = Xtemp - 35 #35 is RGB camera module offset from the center of the realsense
+            Ytarget = -(Ztemp*math.sin(theta) + Ytemp*math.cos(theta))
+            Ztarget = Ztemp*math.cos(theta) + Ytemp*math.sin(theta)
+                
+            #rounding
+            coordinates_text = "(" + str(Decimal(str(Xtarget)).quantize(Decimal('0'), rounding=ROUND_HALF_UP)) + \
+                                ", " + str(Decimal(str(Ytarget)).quantize(Decimal('0'), rounding=ROUND_HALF_UP)) + \
+                                ", " + str(Decimal(str(Ztarget)).quantize(Decimal('0'), rounding=ROUND_HALF_UP)) + ")"
 
-#     # Calculate FPS
-#     current_time = time()
-#     fps = 1 / (current_time - prev_time)
-#     prev_time = current_time
+            # Object details
+            org = (x1, y1)
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            fontScale = 1
+            color = (255, 0, 0)
+            thickness = 1
 
-#     # Display confidence and FPS text
-#     cv2.putText(img, f'Confidence: {confidence}', (10, 310), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-#     cv2.putText(img, f'FPS: {fps:.2f}', (10, 350), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+            cv2.putText(img, classNames[cls], org, font, fontScale, color, thickness)
+            cv2.putText(img, Depth, org, font, fontScale, color, thickness)
+            cv2.putText(img, coordinates_text, (int(d1)-160, int(d2)), font, fontScale, color, thickness)
 
-#     cv2.imshow('RealSense YOLO', img)
-#     if cv2.waitKey(1) == ord('q'):
-#         break
+    # Calculate FPS
+    current_time = time()
+    fps = 1 / (current_time - prev_time)
+    prev_time = current_time
 
-# pipeline.stop()
-# cv2.destroyAllWindows()
+    # Display confidence and FPS text
+    cv2.putText(img, f'Confidence: {confidence}', (10, 310), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+    cv2.putText(img, f'FPS: {fps:.2f}', (10, 350), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+
+    cv2.imshow('RealSense YOLO', img)
+    if cv2.waitKey(1) == ord('q'):
+        break
+
+pipeline.stop()
+cv2.destroyAllWindows()
