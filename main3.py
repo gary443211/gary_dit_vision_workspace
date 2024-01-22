@@ -4,13 +4,18 @@ import math
 import numpy as np
 import pyrealsense2 as rs
 from time import time
+from decimal import Decimal, ROUND_HALF_UP
 
 # Create a RealSense pipeline
 pipeline = rs.pipeline()
 config = rs.config()
 config.enable_stream(rs.stream.color, 1280, 720, rs.format.bgr8, 30)
 config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-pipeline.start(config)
+profile=pipeline.start(config)
+theta=0
+
+# get camera intrinsics, focal distance, optical center
+intr = profile.get_stream(rs.stream.color).as_video_stream_profile().get_intrinsics()
 
 # Model
 model = YOLO("onboard_cam.pt")
@@ -80,7 +85,7 @@ while True:
 
             # Get distance(depth) of the center of the box
             d1, d2 = int((x1+x2)/2), int((y1+y2)/2)
-            Depth = depth_frame.get_distance(int(d1),int(d2))  # by default realsense returns distance in meters 
+            dist = depth_frame.get_distance(int(d1),int(d2))  # by default realsense returns distance in meters 
 
             #calculate real world coordinates
             Xtemp = dist*(int(d1) -intr.ppx)/intr.fx
@@ -105,7 +110,7 @@ while True:
             thickness = 1
 
             cv2.putText(img, classNames[cls], org, font, fontScale, color, thickness)
-            cv2.putText(img, Depth, org, font, fontScale, color, thickness)
+            #cv2.putText(img, Depth, org, font, fontScale, color, thickness)
             cv2.putText(img, coordinates_text, (int(d1)-160, int(d2)), font, fontScale, color, thickness)
 
     # Calculate FPS
