@@ -192,7 +192,7 @@ def detect_video(yolo):
     align_to = rs.stream.color
     align = rs.align(align_to)
     
-    # get camera intrinsics
+    # get camera intrinsics, focal distance, optical center
     intr = profile.get_stream(rs.stream.color).as_video_stream_profile().get_intrinsics()
 
     accum_time = 0
@@ -218,6 +218,7 @@ def detect_video(yolo):
 
         if(len(center_coordinates_array) > 0):
             for i in range(len(center_coordinates_array)):
+                $calculate distance
                 dist = depth_frame.get_distance(int(center_coordinates_array[i][0]), int(center_coordinates_array[i][1]))*1000 #convert to mm
 
                 #calculate real world coordinates
@@ -225,10 +226,12 @@ def detect_video(yolo):
                 Ytemp = dist*(center_coordinates_array[i][1] -intr.ppy)/intr.fy
                 Ztemp = dist
 
+                #coordinate transform, theta is camera depression angle
                 Xtarget = Xtemp - 35 #35 is RGB camera module offset from the center of the realsense
                 Ytarget = -(Ztemp*math.sin(theta) + Ytemp*math.cos(theta))
                 Ztarget = Ztemp*math.cos(theta) + Ytemp*math.sin(theta)
-
+                
+                #rounding
                 coordinates_text = "(" + str(Decimal(str(Xtarget)).quantize(Decimal('0'), rounding=ROUND_HALF_UP)) + \
                                    ", " + str(Decimal(str(Ytarget)).quantize(Decimal('0'), rounding=ROUND_HALF_UP)) + \
                                    ", " + str(Decimal(str(Ztarget)).quantize(Decimal('0'), rounding=ROUND_HALF_UP)) + ")"
