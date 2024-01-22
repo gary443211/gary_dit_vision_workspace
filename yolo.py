@@ -219,7 +219,7 @@ def detect_video(yolo):
         if(len(center_coordinates_array) > 0):
             for i in range(len(center_coordinates_array)):
                 $calculate distance
-                dist = depth_frame.get_distance(int(center_coordinates_array[i][0]), int(center_coordinates_array[i][1]))*1000 #convert to mm
+                dist = depth_frame.get_distance(int(center_coordinates_array[i][0]), int(center_coordinates_array[i][1])) #in meters
 
                 #calculate real world coordinates
                 Xtemp = dist*(center_coordinates_array[i][0] -intr.ppx)/intr.fx
