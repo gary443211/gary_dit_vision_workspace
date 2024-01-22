@@ -9,7 +9,7 @@ from decimal import Decimal, ROUND_HALF_UP
 # Create a RealSense pipeline
 pipeline = rs.pipeline()
 config = rs.config()
-config.enable_stream(rs.stream.color, 1280, 720, rs.format.bgr8, 30)
+config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
 config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
 profile=pipeline.start(config)
 theta=0
@@ -93,7 +93,8 @@ while True:
             Ztemp = dist
 
             #coordinate transformation, theta is the camera deprssion angle
-            Xtarget = Xtemp - 35 #35 is RGB camera module offset from the center of the realsense
+            #Xtarget = Xtemp - 35 #35 is RGB camera module offset from the center of the realsense
+            Xtarget = Xtemp
             Ytarget = -(Ztemp*math.sin(theta) + Ytemp*math.cos(theta))
             Ztarget = Ztemp*math.cos(theta) + Ytemp*math.sin(theta)
                 
@@ -111,7 +112,7 @@ while True:
 
             cv2.putText(img, classNames[cls], org, font, fontScale, color, thickness)
             #cv2.putText(img, Depth, org, font, fontScale, color, thickness)
-            cv2.putText(img, coordinates_text, (int(d1)-160, int(d2)), font, fontScale, color, thickness)
+            cv2.putText(img, coordinates_text, (int(d1)-160, int(d2)), font, fontScale, color, 2)
 
     # Calculate FPS
     current_time = time()
