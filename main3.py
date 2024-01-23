@@ -12,7 +12,11 @@ config = rs.config()
 config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
 config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
 profile=pipeline.start(config)
+
 theta=0 #camera depression angle
+
+align_to = rs.stream.color
+align = rs.align(align_to)
 
 # get camera intrinsics, focal distance, optical center
 intr = profile.get_stream(rs.stream.color).as_video_stream_profile().get_intrinsics()
@@ -49,8 +53,9 @@ cv2.resizeWindow('RealSense YOLO', window_width, window_height)
 while True:
     # Wait for a RealSense frame
     frames = pipeline.wait_for_frames()
-    color_frame = frames.get_color_frame()
-    depth_frame = frames.get_depth_frame()
+    aligned_frames = align.process(frames)
+    color_frame = aligned_frames.get_color_frame()
+    depth_frame = aligned_frames.get_depth_frame()
 
     # Convert RealSense frame to OpenCV format
     img = np.asanyarray(color_frame.get_data())
@@ -84,7 +89,7 @@ while True:
             print("Class name -->", classNames[cls])
 
             # Get distance(depth) of the center of the box
-            d1, d2 = int((x1+x2)/2), int((y1+y2)/2)
+            d1, d2 = int((x1+x2)/2), int(y1/4 + y2*3/4)
             dist = depth_frame.get_distance(int(d1),int(d2))  # by default realsense returns distance in meters 
 
             #calculate real world coordinates
@@ -97,15 +102,16 @@ while True:
             Xtarget = Xtemp #seems like we don't have the offset here
             Ytarget = -(Ztemp*math.sin(theta) + Ytemp*math.cos(theta))
             Ztarget = Ztemp*math.cos(theta) + Ytemp*math.sin(theta)
-
-            coordinates_text = "(" + str(Xtarget) + \
-                                ", " + str(Ytarget) + \
-                                ", " + str(Ztarget) + ")"
             
-            # #rounding
-            # coordinates_text = "(" + str(Decimal(str(Xtarget)).quantize(Decimal('0'), rounding=ROUND_HALF_UP)) + \
-            #                     ", " + str(Decimal(str(Ytarget)).quantize(Decimal('0'), rounding=ROUND_HALF_UP)) + \
-            #                     ", " + str(Decimal(str(Ztarget)).quantize(Decimal('0'), rounding=ROUND_HALF_UP)) + ")"
+            # #no rounding
+            # coordinates_text = "(" + str(Xtarget) + \
+            #                     ", " + str(Ytarget) + \
+            #                     ", " + str(Ztarget) + ")"
+            
+            #rounding
+            coordinates_text = "(" + str(Decimal(str(Xtarget)).quantize(Decimal('.000'), rounding=ROUND_HALF_UP)) + \
+                                ", " + str(Decimal(str(Ytarget)).quantize(Decimal('.000'), rounding=ROUND_HALF_UP)) + \
+                                ", " + str(Decimal(str(Ztarget)).quantize(Decimal('.000'), rounding=ROUND_HALF_UP)) + ")"
 
             # Object details
             org = (x1, y1)
@@ -116,7 +122,7 @@ while True:
 
             cv2.putText(img, classNames[cls], org, font, fontScale, color, thickness)
             #cv2.putText(img, Depth, org, font, fontScale, color, thickness)
-            cv2.putText(img, coordinates_text, (int(d1)-80, int(d2)), font, fontScale, color, 2)
+            cv2.putText(img, coordinates_text, (int(d1)-160, int(d2)), font, fontScale, color, 2)
 
     # Calculate FPS
     current_time = time()
