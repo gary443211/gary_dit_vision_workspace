@@ -12,7 +12,7 @@ config = rs.config()
 config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
 config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
 profile=pipeline.start(config)
-theta=0
+theta=0 #camera depression angle
 
 # get camera intrinsics, focal distance, optical center
 intr = profile.get_stream(rs.stream.color).as_video_stream_profile().get_intrinsics()
@@ -29,7 +29,7 @@ fps = 0
 
 # Set the desired window resolution
 window_width = 640
-window_height = 360
+window_height = 480
 
 # Create an OpenCV window
 cv2.namedWindow('RealSense YOLO', cv2.WINDOW_NORMAL)
@@ -97,11 +97,15 @@ while True:
             Xtarget = Xtemp #seems like we don't have the offset here
             Ytarget = -(Ztemp*math.sin(theta) + Ytemp*math.cos(theta))
             Ztarget = Ztemp*math.cos(theta) + Ytemp*math.sin(theta)
-                
-            #rounding
-            coordinates_text = "(" + str(Decimal(str(Xtarget)).quantize(Decimal('0'), rounding=ROUND_HALF_UP)) + \
-                                ", " + str(Decimal(str(Ytarget)).quantize(Decimal('0'), rounding=ROUND_HALF_UP)) + \
-                                ", " + str(Decimal(str(Ztarget)).quantize(Decimal('0'), rounding=ROUND_HALF_UP)) + ")"
+
+            coordinates_text = "(" + str(Xtarget) + \
+                                ", " + str(Ytarget) + \
+                                ", " + str(Ztarget) + ")"
+            
+            # #rounding
+            # coordinates_text = "(" + str(Decimal(str(Xtarget)).quantize(Decimal('0'), rounding=ROUND_HALF_UP)) + \
+            #                     ", " + str(Decimal(str(Ytarget)).quantize(Decimal('0'), rounding=ROUND_HALF_UP)) + \
+            #                     ", " + str(Decimal(str(Ztarget)).quantize(Decimal('0'), rounding=ROUND_HALF_UP)) + ")"
 
             # Object details
             org = (x1, y1)
@@ -112,7 +116,7 @@ while True:
 
             cv2.putText(img, classNames[cls], org, font, fontScale, color, thickness)
             #cv2.putText(img, Depth, org, font, fontScale, color, thickness)
-            cv2.putText(img, coordinates_text, (int(d1)-160, int(d2)), font, fontScale, color, 2)
+            cv2.putText(img, coordinates_text, (int(d1)-80, int(d2)), font, fontScale, color, 2)
 
     # Calculate FPS
     current_time = time()
